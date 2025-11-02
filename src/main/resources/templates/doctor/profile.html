@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile - FamCare</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .profile-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .profile-card h1 { color: white; margin: 0 0 10px 0; }
+        .profile-card p { margin: 5px 0; opacity: 0.95; }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .info-item {
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #333;
+            display: inline-block;
+            min-width: 150px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .status-available {
+            background: #4CAF50;
+            color: white;
+        }
+        .status-unavailable {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🏥 FamCare - Doctor Portal</h1>
+            <div class="nav-links">
+                <a href="/doctor/dashboard">Dashboard</a>
+                <a href="/doctor/messages">Messages</a>
+                <a href="/doctor/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="back-link">
+                <a href="/doctor/dashboard">← Back to Dashboard</a>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div th:if="${error}" class="alert alert-error">
+                <p th:text="${error}"></p>
+            </div>
+            <div th:if="${success}" class="alert alert-success">
+                <p th:text="${success}"></p>
+            </div>
+
+            <!-- Profile Header -->
+            <div class="profile-card" th:if="${doctor != null}">
+                <h1>👨‍⚕️ <span th:text="${doctor.fullName}"></span></h1>
+                <p style="font-size: 1.2rem; margin: 15px 0;" th:text="${doctor.specialization}"></p>
+                <p th:text="${doctor.qualification}"></p>
+                <p style="margin-top: 15px;">
+                    <span class="status-badge" th:classappend="${doctor.isAvailable ? 'status-available' : 'status-unavailable'}">
+                        <span th:text="${doctor.isAvailable ? '✅ Available' : '❌ Unavailable'}"></span>
+                    </span>
+                </p>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="info-grid" th:if="${doctor != null}">
+                <!-- Professional Information -->
+                <div class="info-box">
+                    <h3>Professional Information</h3>
+                    <div class="info-item">
+                        <span class="info-label">Specialization:</span>
+                        <span th:text="${doctor.specialization}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Qualification:</span>
+                        <span th:text="${doctor.qualification}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">License Number:</span>
+                        <span th:text="${doctor.licenseNumber}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Experience:</span>
+                        <span th:text="${doctor.experienceYears} + ' years'"></span>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="info-box">
+                    <h3>Contact Information</h3>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span th:text="${doctor.email}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone:</span>
+                        <span th:text="${doctor.phoneNumber}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Username:</span>
+                        <span th:text="${doctor.username}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since:</span>
+                        <span th:text="${doctor.createdAt}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio Section -->
+            <div class="section" th:if="${doctor != null && doctor.bio != null}">
+                <h2>About Dr. <span th:text="${doctor.fullName}"></span></h2>
+                <p th:text="${doctor.bio}" style="line-height: 1.8; font-size: 1.05rem;"></p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/doctor/profile/edit" class="btn-primary">✏️ Edit Profile</a>
+                <a href="/doctor/dashboard" class="btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

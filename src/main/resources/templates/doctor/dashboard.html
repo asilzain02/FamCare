@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - FamCare</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .doctor-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .doctor-header h1 { color: white; margin: 0; }
+        .doctor-header p { margin: 10px 0 0 0; opacity: 0.9; }
+        
+        .message-preview {
+            background: white;
+            border: 1px solid #ddd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .message-preview:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left-color: #667eea;
+        }
+        .message-preview.unread {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .message-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🏥 FamCare - Doctor Portal</h1>
+            <div class="nav-links">
+                <a href="/doctor/dashboard">Dashboard</a>
+                <a href="/doctor/messages">Messages <span th:if="${unreadMessageCount > 0}" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;" th:text="${unreadMessageCount}"></span></a>
+                <a href="/doctor/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <!-- Doctor Header -->
+            <div class="doctor-header" th:if="${doctor != null}">
+                <h1>Welcome, <span th:text="${doctor.fullName}"></span> 👨‍⚕️</h1>
+                <p th:text="${doctor.specialization} + ' • ' + ${doctor.qualification}"></p>
+                <p th:text="${doctor.experienceYears} + ' years of experience'"></p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Unread Messages</h3>
+                    <p class="mood-score" th:text="${unreadMessageCount}"></p>
+                    <small>Awaiting response</small>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Availability Status</h3>
+                    <p class="mood-score" th:if="${doctor != null && doctor.isAvailable}">✅</p>
+                    <p class="mood-score" th:unless="${doctor != null && doctor.isAvailable}">❌</p>
+                    <small th:text="${doctor != null && doctor.isAvailable ? 'Available' : 'Not Available'}"></small>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Specialization</h3>
+                    <p style="font-size: 1.2rem; font-weight: bold;" th:text="${doctor != null ? doctor.specialization : 'N/A'}"></p>
+                </div>
+            </div>
+
+            <!-- Recent Messages -->
+            <div class="section">
+                <h2>📬 Recent Messages</h2>
+                
+                <div th:if="${recentMessages != null and recentMessages.size() > 0}">
+                    <div th:each="msg : ${recentMessages}" 
+                         class="message-preview"
+                        th:classappend="${!msg.isRead ? 'unread' : ''}"
+                        onclick="location.href='/doctor/messages/' + [[${msg.id}]]">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h4 th:text="${msg.subject}"></h4>
+                                <p style="margin: 8px 0; color: #555;">
+                                    <strong>From:</strong> <span th:text="${msg.senderName}"></span> 
+                                    (<span th:text="${msg.senderRole}"></span>)
+                                </p>
+                            </div>
+                            <span th:if="${!msg.isRead}" style="background: #4CAF50; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem;">New</span>
+                        </div>
+                        
+                        <div class="message-meta">
+                            <span th:text="${msg.createdAt}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:unless="${recentMessages != null and recentMessages.size() > 0}">
+                    <p class="no-data">No messages yet.</p>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <a href="/doctor/messages" class="btn-primary">View All Messages</a>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section">
+                <h2>Quick Actions</h2>
+                <div class="action-buttons">
+                    <a href="/doctor/messages" class="btn-primary">📬 View Messages</a>
+                    <a href="/doctor/profile" class="btn-secondary">👤 View Profile</a>
+                    <a href="/doctor/profile/edit" class="btn-secondary">✏️ Edit Profile</a>
+                </div>
+            </div>
+
+            <!-- Professional Info -->
+            <div class="section info-section" th:if="${doctor != null}">
+                <h2>Professional Information</h2>
+                <ul>
+                    <li><strong>Specialization:</strong> <span th:text="${doctor.specialization}"></span></li>
+                    <li><strong>Qualification:</strong> <span th:text="${doctor.qualification}"></span></li>
+                    <li><strong>License Number:</strong> <span th:text="${doctor.licenseNumber}"></span></li>
+                    <li><strong>Experience:</strong> <span th:text="${doctor.experienceYears}"></span> years</li>
+                    <li><strong>Email:</strong> <span th:text="${doctor.email}"></span></li>
+                    <li><strong>Phone:</strong> <span th:text="${doctor.phoneNumber}"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

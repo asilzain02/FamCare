@@ -1,7 +1,9 @@
 package com.famcare.controller;
 
 import com.famcare.model.User;
+import com.famcare.model.Doctor;
 import com.famcare.service.AuthService;
+import com.famcare.service.DoctorService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private DoctorService doctorService;
 
     /**
      * Show home page
@@ -33,7 +38,7 @@ public class AuthController {
     }
 
     /**
-     * Handle login form submission
+     * Handle login form submission - supports Parent, Child, and Doctor login
      */
     @PostMapping("/login")
     public String login(
@@ -42,29 +47,40 @@ public class AuthController {
             HttpSession session,
             Model model) {
 
-        // Authenticate user
+        // First, try to authenticate as regular user (Parent/Child)
         User user = authService.authenticateUser(username, password);
 
-        if (user == null) {
-            // Login failed
-            model.addAttribute("error", "Invalid username or password");
-            return "login";
+        if (user != null) {
+            // Store user in session
+            session.setAttribute("loggedInUser", user);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userRole", user.getRole());
+            session.setAttribute("userName", user.getFullName());
+
+            // Redirect based on role
+            if ("PARENT".equalsIgnoreCase(user.getRole())) {
+                return "redirect:/parent/dashboard";
+            } else if ("CHILD".equalsIgnoreCase(user.getRole())) {
+                return "redirect:/child/dashboard";
+            }
         }
 
-        // Store user in session
-        session.setAttribute("loggedInUser", user);
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userRole", user.getRole());
-        session.setAttribute("userName", user.getFullName());
+        // If not a regular user, try to authenticate as doctor
+        Doctor doctor = doctorService.authenticateDoctor(username, password);
 
-        // Redirect based on role
-        if ("PARENT".equalsIgnoreCase(user.getRole())) {
-            return "redirect:/parent/dashboard";
-        } else if ("CHILD".equalsIgnoreCase(user.getRole())) {
-            return "redirect:/child/dashboard";
+        if (doctor != null) {
+            // Store doctor in session
+            session.setAttribute("loggedInUser", doctor);
+            session.setAttribute("userId", doctor.getId());
+            session.setAttribute("userRole", "DOCTOR");
+            session.setAttribute("userName", doctor.getFullName());
+
+            return "redirect:/doctor/dashboard";
         }
 
-        return "redirect:/";
+        // Login failed for all user types
+        model.addAttribute("error", "Invalid username or password");
+        return "login";
     }
 
     /**

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consult Doctors - FamCare</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .doctor-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s;
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+        .doctor-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        .doctor-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+        }
+        .doctor-info h3 {
+            margin: 0 0 8px 0;
+            color: #667eea;
+        }
+        .doctor-specialization {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 5px 0;
+        }
+        .doctor-bio {
+            margin: 15px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        .doctor-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .status-available {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🏥 FamCare</h1>
+            <div class="nav-links">
+                <span>Welcome, Parent!</span>
+                <a href="/parent/dashboard">Dashboard</a>
+                <a href="/parent/doctors/messages">Messages <span th:if="${unreadCount > 0}" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;" th:text="${unreadCount}"></span></a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="back-link">
+                <a href="/parent/dashboard">← Back to Dashboard</a>
+            </div>
+
+            <h1>👨‍⚕️ Consult Our Doctors</h1>
+
+            <div class="section">
+                <p style="font-size: 1.1rem; color: #555; margin-bottom: 30px;">
+                    Connect with our team of qualified mental health professionals. Get expert advice and support for your family's wellness journey.
+                </p>
+
+                <!-- Doctors List -->
+                <div th:if="${doctors != null and doctors.size() > 0}">
+                    <div th:each="doctor : ${doctors}" class="doctor-card">
+                        <div class="doctor-avatar">👨‍⚕️</div>
+                        
+                        <div class="doctor-info">
+                            <h3 th:text="${doctor.fullName}"></h3>
+                            <p class="doctor-specialization">
+                                <strong th:text="${doctor.specialization}"></strong> • <span th:text="${doctor.qualification}"></span>
+                            </p>
+                            
+                            <div class="doctor-meta">
+                                <span>📋 License: <span th:text="${doctor.licenseNumber}"></span></span>
+                                <span>💼 Experience: <span th:text="${doctor.experienceYears}"></span> years</span>
+                                <span class="status-available" th:if="${doctor.isAvailable}">✅ Available</span>
+                            </div>
+                            
+                            <p class="doctor-bio" th:if="${doctor.bio != null}" th:text="${doctor.bio}"></p>
+                            
+                            <p style="color: #666; margin-top: 10px;">
+                                📧 <span th:text="${doctor.email}"></span> | 
+                                📞 <span th:text="${doctor.phoneNumber}"></span>
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <a th:href="@{/parent/doctors/{id}(id=${doctor.id})}" class="btn-secondary btn-small">View Profile</a>
+                            <a th:href="@{/parent/doctors/{id}/message(id=${doctor.id})}" class="btn-primary btn-small">📬 Message</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:unless="${doctors != null and doctors.size() > 0}">
+                    <p class="no-data">No doctors available at the moment. Please check back later.</p>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="section info-section">
+                <h2>💡 How It Works</h2>
+                <ul>
+                    <li>✅ Browse our qualified mental health professionals</li>
+                    <li>✅ Send messages to discuss your family's wellness concerns</li>
+                    <li>✅ Receive expert advice and recommendations</li>
+                    <li>✅ All communications are private and secure</li>
+                    <li>✅ View message history in your inbox</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/parent/doctors/messages" class="btn-primary">📬 My Messages</a>
+                <a href="/parent/dashboard" class="btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Make doctor cards clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.doctor-card').forEach(card => {
+                card.style.cursor = 'pointer';
+            });
+        });
+    </script>
+        </div>
+    </div>
+</body>
+</html>

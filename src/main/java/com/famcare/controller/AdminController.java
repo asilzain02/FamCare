@@ -2,6 +2,8 @@ package com.famcare.controller;
 
 import com.famcare.model.User;
 import com.famcare.repository.UserRepository;
+import com.famcare.service.DoctorService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,9 @@ public class AdminController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DoctorService doctorService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -144,5 +149,37 @@ public class AdminController {
             model.addAttribute("parents", userRepository.findByRole("PARENT"));
             return "admin/create-user";
         }
+    }
+
+    @PostMapping("/create-doctor")
+    public String createDoctor(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam String email,
+            @RequestParam String fullName,
+            @RequestParam String specialization,
+            @RequestParam String qualification,
+            @RequestParam String licenseNumber,
+            @RequestParam Integer experienceYears,
+            @RequestParam String phoneNumber,
+            @RequestParam String bio,
+            Model model) {
+
+        boolean success = doctorService.registerDoctor(
+                username, password, email, fullName,
+                specialization, qualification, licenseNumber,
+                experienceYears, phoneNumber, bio
+        );
+
+        if (!success) {
+            model.addAttribute("error", "Username already exists!");
+            model.addAttribute("parents", userRepository.findByRole("PARENT"));
+            return "admin/create-user";
+        }
+
+        model.addAttribute("success", "Doctor account '" + username + "' created successfully!");
+        model.addAttribute("parents", userRepository.findByRole("PARENT"));
+        
+        return "admin/create-user";
     }
 }

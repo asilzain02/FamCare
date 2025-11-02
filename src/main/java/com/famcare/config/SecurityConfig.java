@@ -25,6 +25,12 @@ public class SecurityConfig {
                 // Allow all admin routes
                 .requestMatchers("/admin", "/admin/**").permitAll()
                 
+                // Allow all doctor routes
+                .requestMatchers("/doctor", "/doctor/**").permitAll()
+                
+                // Allow parent doctor access routes
+                .requestMatchers("/parent/doctors", "/parent/doctors/**").permitAll()
+                
                 // Allow static files
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 

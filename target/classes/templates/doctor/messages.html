@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - FamCare Doctor</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .message-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .message-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left-color: #667eea;
+        }
+        .message-item.unread {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        .message-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .badge-unread {
+            background: #4CAF50;
+            color: white;
+        }
+        .badge-read {
+            background: #e0e0e0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🏥 FamCare - Doctor Portal</h1>
+            <div class="nav-links">
+                <a href="/doctor/dashboard">Dashboard</a>
+                <a href="/doctor/messages">Messages <span th:if="${unreadCount > 0}" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;" th:text="${unreadCount}"></span></a>
+                <a href="/doctor/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="back-link">
+                <a href="/doctor/dashboard">← Back to Dashboard</a>
+            </div>
+
+            <h1>📬 Messages</h1>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Unread Messages</h3>
+                    <p class="mood-score" th:text="${unreadCount}"></p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Inbox</h3>
+                    <p class="mood-score" th:text="${receivedMessages != null ? receivedMessages.size() : 0}"></p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Sent</h3>
+                    <p class="mood-score" th:text="${sentMessages != null ? sentMessages.size() : 0}"></p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('inbox')">Inbox</button>
+                <button class="tab-button" onclick="showTab('sent')">Sent</button>
+            </div>
+
+            <!-- Inbox Tab -->
+            <div id="inbox" class="tab-content active">
+                <h2>Received Messages</h2>
+                
+                <div th:if="${receivedMessages != null and receivedMessages.size() > 0}">
+                    <div th:each="msg : ${receivedMessages}" 
+                         class="message-item"
+                        th:classappend="${!msg.isRead ? 'unread' : ''}"
+                        onclick=`location.href='/doctor/messages/' + [[${msg.id}]]`>
+                        
+                        <div class="message-header">
+                            <div>
+                                <h4 th:text="${msg.subject}"></h4>
+                                <p style="margin: 8px 0; color: #555; font-size: 0.95rem;">
+                                    <strong>From:</strong> <span th:text="${msg.senderName}"></span> 
+                                    (<span th:text="${msg.senderRole}"></span>)
+                                </p>
+                            </div>
+                            <span class="message-badge" th:classappend="${!msg.isRead ? 'badge-unread' : 'badge-read'}" 
+                                th:text="${!msg.isRead ? 'New' : 'Read'}"></span>
+                        </div>
+                        
+                        <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">
+                            📅 <span th:text="${msg.createdAt}"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <div th:unless="${receivedMessages != null and receivedMessages.size() > 0}">
+                    <p class="no-data">No messages received yet.</p>
+                </div>
+            </div>
+
+            <!-- Sent Tab -->
+            <div id="sent" class="tab-content">
+                <h2>Sent Messages</h2>
+                
+                <div th:if="${sentMessages != null and sentMessages.size() > 0}">
+                    <div th:each="msg : ${sentMessages}" 
+                         class="message-item"
+                        onclick=`location.href='/doctor/messages/' + [[${msg.id}]]`>
+                        
+                        <div class="message-header">
+                            <div>
+                                <h4 th:text="${msg.subject}"></h4>
+                                <p style="margin: 8px 0; color: #555; font-size: 0.95rem;">
+                                    <strong>To:</strong> <span th:text="${msg.receiverName}"></span> 
+                                    (<span th:text="${msg.receiverRole}"></span>)
+                                </p>
+                            </div>
+                            <span class="message-badge badge-read">Sent</span>
+                        </div>
+                        
+                        <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">
+                            📅 <span th:text="${msg.createdAt}"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <div th:unless="${sentMessages != null and sentMessages.size() > 0}">
+                    <p class="no-data">No sent messages yet.</p>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="action-buttons">
+                <a href="/doctor/dashboard" class="btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
