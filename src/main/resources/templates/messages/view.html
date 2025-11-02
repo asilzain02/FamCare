@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Message - FamCare</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .message-view-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .message-view {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-header {
+            border-bottom: 2px solid #f5f5f5;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .message-subject {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .message-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+        }
+
+        .info-item strong {
+            color: #333;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .message-body {
+            padding: 30px 0;
+            line-height: 1.8;
+            color: #333;
+            font-size: 1.05rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f5f5f5;
+            flex-wrap: wrap;
+        }
+
+        .thread-container {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 3px solid #f5f5f5;
+        }
+
+        .thread-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .thread-message {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .thread-message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .thread-from {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .thread-time {
+            color: #999;
+        }
+
+        .thread-body {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-read {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-unread {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .message-view {
+                padding: 20px;
+            }
+
+            .message-subject {
+                font-size: 1.4rem;
+            }
+
+            .message-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .message-actions {
+                flex-direction: column;
+            }
+
+            .message-actions a,
+            .message-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🏥 FamCare</h1>
+            <div class="nav-links">
+                <span>View Message</span>
+                <a href="/messages/inbox">Inbox</a>
+                <a href="/">Dashboard</a>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="message-view-container">
+            <div class="back-link">
+                <a href="/messages/inbox">← Back to Inbox</a>
+            </div>
+
+            <div class="message-view" th:if="${message != null}">
+                <!-- Message Header -->
+                <div class="message-header">
+                    <div class="message-subject" th:text="${message.subject}"></div>
+                    
+                    <div class="message-info">
+                        <div class="info-item">
+                            <div class="user-avatar" th:text="${message.senderFullName.substring(0,1).toUpperCase()}"></div>
+                            <div>
+                                <strong>From:</strong> 
+                                <span th:text="${message.senderFullName}"></span>
+                            </div>
+                        </div>
+
+                        <div class="info-item" th:if="${message.receiverId == currentUserId}">
+                            <strong>To:</strong> 
+                            <span>Me</span>
+                        </div>
+
+                        <div class="info-item" th:if="${message.senderId == currentUserId}">
+                            <strong>To:</strong> 
+                            <span th:text="${message.receiverFullName}"></span>
+                        </div>
+
+                        <div class="info-item">
+                            <strong>Sent:</strong> 
+                            <span th:text="${#temporals.format(message.sentAt, 'MMMM dd, yyyy hh:mm a')}"></span>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="status-badge" 
+                                  th:classappend="${message.isRead ? 'status-read' : 'status-unread'}"
+                                  th:text="${message.isRead ? '✓ Read' : '● Unread'}">
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Body -->
+                <div class="message-body" th:text="${message.messageBody}"></div>
+
+                <!-- Message Actions -->
+                <div class="message-actions">
+                    <a th:href="@{/messages/compose(replyTo=${message.id})}" class="btn-primary">
+                        ↩️ Reply
+                    </a>
+                    
+                    <form method="POST" th:action="@{/messages/delete/{id}(id=${message.id})}" 
+                          style="display: inline;"
+                          onsubmit="return confirm('Are you sure you want to delete this message?')">
+                        <input type="hidden" name="returnTo" value="inbox">
+                        <button type="submit" class="btn-danger">🗑️ Delete</button>
+                    </form>
+
+                    <a href="/messages/inbox" class="btn-secondary">
+                        ← Back to Inbox
+                    </a>
+                </div>
+
+                <!-- Conversation Thread -->
+                <div th:if="${thread != null and thread.size() > 0}" class="thread-container">
+                    <div class="thread-header">
+                        📜 Conversation History (<span th:text="${thread.size()}"></span> messages)
+                    </div>
+
+                    <div th:each="threadMsg : ${thread}" class="thread-message">
+                        <div class="thread-message-header">
+                            <div class="thread-from">
+                                <strong th:text="${threadMsg.senderFullName}"></strong>
+                                → 
+                                <span th:text="${threadMsg.receiverFullName}"></span>
+                            </div>
+                            <div class="thread-time" th:text="${#temporals.format(threadMsg.sentAt, 'MMM dd, hh:mm a')}"></div>
+                        </div>
+                        <div style="font-weight: 600; color: #555; margin-bottom: 8px;" th:text="${threadMsg.subject}"></div>
+                        <div class="thread-body" th:text="${threadMsg.messageBody}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div th:if="${message == null}" class="alert alert-error">
+                <p>Message not found or you don't have permission to view it.</p>
+                <a href="/messages/inbox" class="btn-secondary" style="margin-top: 15px;">Back to Inbox</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
